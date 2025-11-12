@@ -29,10 +29,10 @@ Visit [http://localhost:3000](http://localhost:3000) to try it out. The curated 
 
 ## Deployment (GitHub Pages)
 
-- Push to `main` (or trigger the `Deploy to GitHub Pages` workflow manually) and GitHub Actions will run `npm run build` + `npm run export`, then publish the `out/` directory via Pages.
+- Push to `main` (or trigger the `Deploy to GitHub Pages` workflow manually) and GitHub Actions will run `npm run build` (configured with `output: "export"`) to publish the `out/` directory via Pages.
 - On first use: Repository **Settings → Pages → Build and deployment** 에서 **Source = GitHub Actions**를 선택하면 이 워크플로우가 Pages 배포 파이프라인이 됩니다.
 - 사이트 주소는 `https://<사용자>.github.io/<저장소>/` 형태이며, 필요하면 `next.config.ts`에 `assetPrefix/basePath`를 설정해 맞춰주세요.
-- 변경사항을 검증하려면 로컬에서 `npm run build && npm run export`로 `out/` 폴더를 생성해 정적 결과물을 확인할 수 있습니다.
+- 변경사항을 검증하려면 로컬에서 `npm run build`(또는 동등한 `npm run export`)로 `out/` 폴더를 생성해 정적 결과물을 확인할 수 있습니다.
 
 ## Building from here
 
