@@ -26,6 +26,12 @@ type PersistedExplorerState = {
 const isValidLevelFilter = (value: unknown): value is LevelFilter =>
   value === "all" || (typeof value === "string" && levels.includes(value as IssueLevel));
 
+/**
+ * 업데이트 날짜를 상대적인 표현(today, 3 days ago 등)으로 변환
+ *
+ * @param isoDate ISO-8601 형식의 날짜 문자열
+ * @returns 상대적인 시간 표현
+ */
 const formatRelativeTime = (isoDate: string) => {
   const date = new Date(isoDate);
   const diffMs = Date.now() - date.getTime();
@@ -51,6 +57,16 @@ const formatRelativeTime = (isoDate: string) => {
   return `${Math.floor(diffMonths / 12)} yr ago`;
 };
 
+/**
+ * 필터 조건과 이슈가 매칭되는지 판단하는 순수 함수
+ *
+ * @param issue 비교 대상 이슈
+ * @param query 소문자로 정규화된 검색어
+ * @param language 선택된 언어 필터
+ * @param selectedLabels 선택된 라벨 목록
+ * @param level 난이도 필터
+ * @param onlyGFI good first issue만 표시할지 여부
+ */
 const issueMatches = (
   issue: Issue,
   query: string,
@@ -77,6 +93,11 @@ const issueMatches = (
   );
 };
 
+/**
+ * 필터, 상태 저장, 결과 리스트를 모두 포함한 메인 이슈 탐색기 컴포넌트
+ *
+ * 클라이언트 컴포넌트로 동작하며 로컬 스토리지에 필터 상태를 동기화합니다.
+ */
 export function IssueExplorer() {
   const headingId = "issue-explorer-heading";
   const statsHeadingId = "issue-explorer-stats";
@@ -90,6 +111,9 @@ export function IssueExplorer() {
   const [showSavedOnly, setShowSavedOnly] = useState(false);
   const hasHydrated = useRef(false);
 
+  /**
+   * 초기 마운트 시 로컬 스토리지에 저장된 사용자 설정을 복원
+   */
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -128,6 +152,9 @@ export function IssueExplorer() {
     }
   }, []);
 
+  /**
+   * 필터 상태가 바뀌면 로컬 스토리지에 저장해 새로고침 후에도 컨텍스트 유지
+   */
   useEffect(() => {
     if (typeof window === "undefined" || !hasHydrated.current) {
       return;
@@ -192,12 +219,22 @@ export function IssueExplorer() {
     };
   }, [filteredIssues]);
 
+  /**
+   * 라벨 버튼 토글 시 선택 목록을 업데이트
+   *
+   * @param label 토글 대상 라벨 이름
+   */
   const toggleLabel = (label: string) => {
     setSelectedLabels((prev) =>
       prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label],
     );
   };
 
+  /**
+   * 개별 이슈를 저장/해제하면서 저장된 ID 집합을 갱신
+   *
+   * @param issueId 토글할 이슈 ID
+   */
   const toggleSavedIssue = (issueId: string) => {
     setSavedIssueIds((prev) => {
       const next = new Set(prev);
@@ -210,6 +247,9 @@ export function IssueExplorer() {
     });
   };
 
+  /**
+   * 사용자가 빠르게 초기 상태로 돌아갈 수 있도록 모든 필터를 리셋
+   */
   const resetFilters = () => {
     setQuery("");
     setLanguage("all");

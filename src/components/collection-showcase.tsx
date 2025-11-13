@@ -5,6 +5,12 @@ type Props = {
   issues: Issue[];
 };
 
+/**
+ * 컬렉션과 이슈 데이터를 연결해 주제별 추천 목록을 보여주는 컴포넌트
+ *
+ * @param props.collections 전시할 컬렉션 배열
+ * @param props.issues 컬렉션과 매칭할 전체 이슈 목록
+ */
 export function CollectionShowcase({ collections, issues }: Props) {
   const issueLookup = new Map(issues.map((issue) => [issue.id, issue]));
 

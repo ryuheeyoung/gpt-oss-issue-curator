@@ -4,6 +4,11 @@ type Props = {
   guides: MaintainerGuide[];
 };
 
+/**
+ * 리포별로 수집된 컨트리뷰션 가이드를 카드 형태로 나열하는 섹션
+ *
+ * @param props.guides maintainer 인사이트 카드 데이터
+ */
 export function MaintainerGuides({ guides }: Props) {
   return (
     <section className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
