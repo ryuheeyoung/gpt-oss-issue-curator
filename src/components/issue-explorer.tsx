@@ -78,6 +78,9 @@ const issueMatches = (
 };
 
 export function IssueExplorer() {
+  const headingId = "issue-explorer-heading";
+  const statsHeadingId = "issue-explorer-stats";
+  const visibilitySummaryId = "issue-explorer-visibility";
   const [query, setQuery] = useState("");
   const [language, setLanguage] = useState<string>("all");
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
@@ -217,7 +220,10 @@ export function IssueExplorer() {
   };
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-emerald-900/20 backdrop-blur">
+    <section
+      aria-labelledby={headingId}
+      className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-emerald-900/20 backdrop-blur"
+    >
       <div className="grid gap-6 lg:grid-cols-[280px,1fr]">
         <aside className="space-y-6 rounded-2xl border border-white/10 bg-zinc-950/70 p-5 text-sm">
           <div>
@@ -226,17 +232,19 @@ export function IssueExplorer() {
           </div>
 
           <label className="space-y-2">
-            <span className="text-xs font-medium text-zinc-400">Search</span>
+            <span className="text-xs font-medium text-zinc-200">Search</span>
             <input
+              type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Keywords, repo, label..."
+              aria-label="Search issues"
               className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-emerald-400 focus:outline-none"
             />
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-medium text-zinc-400">Language</span>
+            <span className="text-xs font-medium text-zinc-200">Language</span>
             <select
               value={language}
               onChange={(event) => setLanguage(event.target.value)}
@@ -251,78 +259,98 @@ export function IssueExplorer() {
             </select>
           </label>
 
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-zinc-400">Labels</p>
-            <div className="flex flex-wrap gap-2">
-              {labelFilters.map((label) => (
-                <button
-                  key={label}
-                  onClick={() => toggleLabel(label)}
-                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                    selectedLabels.includes(label)
-                      ? "border-emerald-400 bg-emerald-500/20 text-emerald-50"
-                      : "border-white/10 text-zinc-400 hover:border-emerald-400/60 hover:text-white"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+          <fieldset className="space-y-2 border-0 p-0">
+            <legend className="text-xs font-medium text-zinc-200">Labels</legend>
+            <div className="flex flex-wrap gap-2" aria-label="Filter by label">
+              {labelFilters.map((label) => {
+                const isActive = selectedLabels.includes(label);
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => toggleLabel(label)}
+                    aria-pressed={isActive}
+                    className={`rounded-full border px-3 py-1 text-xs transition focus:border-emerald-300 ${
+                      isActive
+                        ? "border-emerald-400 bg-emerald-500/20 text-emerald-50"
+                        : "border-white/10 text-zinc-200 hover:border-emerald-400/60 hover:text-white"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
-          </div>
+          </fieldset>
 
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-zinc-400">Level</p>
-            <div className="flex flex-wrap gap-2">
+          <fieldset className="space-y-2 border-0 p-0">
+            <legend className="text-xs font-medium text-zinc-200">Level</legend>
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Filter by difficulty level">
               <button
+                type="button"
                 onClick={() => setLevel("all")}
-                className={`rounded-full px-3 py-1 text-xs transition ${
+                aria-pressed={level === "all"}
+                className={`rounded-full px-3 py-1 text-xs transition focus:border-emerald-300 ${
                   level === "all"
                     ? "bg-white text-black"
-                    : "border border-white/10 text-zinc-400 hover:border-emerald-400/60 hover:text-white"
+                    : "border border-white/10 text-zinc-200 hover:border-emerald-400/60 hover:text-white"
                 }`}
               >
                 All
               </button>
-              {levels.map((levelOption) => (
-                <button
-                  key={levelOption}
-                  onClick={() => setLevel(levelOption)}
-                  className={`rounded-full px-3 py-1 text-xs capitalize transition ${
-                    level === levelOption
-                      ? "bg-emerald-500 text-emerald-950"
-                      : "border border-white/10 text-zinc-400 hover:border-emerald-400/60 hover:text-white"
-                  }`}
-                >
-                  {levelOption.replace("-", " ")}
-                </button>
-              ))}
+              {levels.map((levelOption) => {
+                const isActive = level === levelOption;
+                return (
+                  <button
+                    key={levelOption}
+                    type="button"
+                    onClick={() => setLevel(levelOption)}
+                    aria-pressed={isActive}
+                    className={`rounded-full px-3 py-1 text-xs capitalize transition focus:border-emerald-300 ${
+                      isActive
+                        ? "bg-emerald-500 text-emerald-950"
+                        : "border border-white/10 text-zinc-200 hover:border-emerald-400/60 hover:text-white"
+                    }`}
+                  >
+                    {levelOption.replace("-", " ")}
+                  </button>
+                );
+              })}
             </div>
-          </div>
+          </fieldset>
 
           <div className="space-y-3">
-            <label className="flex items-center gap-3 text-sm text-zinc-300">
+            <label className="flex items-center gap-3 text-sm text-zinc-100">
               <input
                 type="checkbox"
                 checked={onlyGFI}
                 onChange={() => setOnlyGFI((value) => !value)}
-                className="size-4 rounded border border-white/30 bg-white/10 accent-emerald-500"
+                className="size-4 rounded border border-white/30 bg-white/10 accent-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400/80"
               />
               Show only good first issue
             </label>
 
-            <label className="flex items-center gap-3 text-sm text-zinc-300">
+            <label className="flex items-center gap-3 text-sm text-zinc-100">
               <input
                 type="checkbox"
                 checked={showSavedOnly}
                 onChange={() => setShowSavedOnly((value) => !value)}
-                className="size-4 rounded border border-white/30 bg-white/10 accent-emerald-500"
+                className="size-4 rounded border border-white/30 bg-white/10 accent-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400/80"
               />
               Show saved issues
             </label>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-zinc-400">
-            <p className="text-sm font-semibold text-white">Live stats</p>
+          <div
+            className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-zinc-100"
+            role="region"
+            aria-live="polite"
+            aria-labelledby={statsHeadingId}
+          >
+            <p id={statsHeadingId} className="text-sm font-semibold text-white">
+              Live stats
+            </p>
+            <p className="sr-only">Counts update automatically as you change filters.</p>
             <ul className="mt-3 space-y-1">
               <li className="flex justify-between">
                 <span>Surface issues</span>
@@ -344,6 +372,7 @@ export function IssueExplorer() {
           </div>
 
           <button
+            type="button"
             onClick={resetFilters}
             className="w-full rounded-xl border border-white/10 px-3 py-2 text-sm text-white transition hover:border-emerald-400 hover:bg-emerald-500/10"
           >
@@ -362,13 +391,22 @@ export function IssueExplorer() {
                   ? "Pick an issue that matches your energy"
                   : "Nothing matches these filters"}
               </h2>
-              <p className="text-sm text-zinc-400">
+              <p
+                id={visibilitySummaryId}
+                role="status"
+                aria-live="polite"
+                className="text-sm text-zinc-200"
+              >
                 {filteredIssues.length} of {curatedIssues.length} issues visible
               </p>
             </div>
 
             {savedIssueIds.size > 0 && (
-              <div className="rounded-full border border-emerald-400/40 px-4 py-1 text-sm text-emerald-200">
+              <div
+                role="status"
+                aria-live="polite"
+                className="rounded-full border border-emerald-400/40 px-4 py-1 text-sm text-emerald-200"
+              >
                 {savedIssueIds.size} saved
               </div>
             )}
@@ -376,7 +414,7 @@ export function IssueExplorer() {
 
           <div className="space-y-4">
             {filteredIssues.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-zinc-400">
+              <div className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-zinc-200">
                 Try relaxing a filter or clearing saved-only mode to reveal more issues.
               </div>
             )}
@@ -390,7 +428,7 @@ export function IssueExplorer() {
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs uppercase text-zinc-400">{issue.repo}</p>
+                      <p className="text-xs uppercase text-zinc-200">{issue.repo}</p>
                       <h3 className="text-xl font-semibold text-white">{issue.title}</h3>
                     </div>
                     <button
@@ -406,19 +444,19 @@ export function IssueExplorer() {
                     </button>
                   </div>
 
-                  <p className="mt-2 text-sm text-zinc-300">{issue.description}</p>
+                  <p className="mt-2 text-sm text-zinc-100">{issue.description}</p>
 
                   <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                    <span className="rounded-full border border-white/10 px-3 py-1 text-zinc-400">
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-zinc-200">
                       {issue.language}
                     </span>
-                    <span className="rounded-full border border-white/10 px-3 py-1 capitalize text-zinc-400">
+                    <span className="rounded-full border border-white/10 px-3 py-1 capitalize text-zinc-200">
                       {issue.level.replace("-", " ")}
                     </span>
-                    <span className="rounded-full border border-white/10 px-3 py-1 text-zinc-400">
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-zinc-200">
                       * {issue.stars.toLocaleString()} stars
                     </span>
-                    <span className="rounded-full border border-white/10 px-3 py-1 text-zinc-400">
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-zinc-200">
                       Updated {formatRelativeTime(issue.updatedAt)}
                     </span>
                   </div>
@@ -435,13 +473,14 @@ export function IssueExplorer() {
                     <a
                       href={issue.link}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noreferrer noopener"
+                      aria-label={`View ${issue.title} on GitHub`}
                       className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-black transition hover:bg-emerald-200"
                     >
                       View issue
                       <span aria-hidden>-&gt;</span>
                     </a>
-                    <div className="text-zinc-400">
+                    <div className="text-zinc-200">
                       Topics: {issue.topics.slice(0, 3).join(", ")}
                     </div>
                   </div>
