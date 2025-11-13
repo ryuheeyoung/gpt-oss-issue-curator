@@ -34,7 +34,6 @@ The UI is purposely dense yet focused so you can find actionable work in minutes
 
 ## Next experiments
 
-- 이슈 카드를 클릭하면 저장한 항목을 모달/사이드패널에서 바로 훑어볼 수 있는 “이슈 상세” 뷰 추가.
 - `CollectionShowcase`, `MaintainerGuides` 등 다른 섹션에도 키보드 탐색/스크린리더 테스트를 늘려 안정성 확보.
 - 라이트 모드 혹은 색각 보정 모드를 토글로 제공해 대비 요구사항을 상황별로 충족시키기.
 - GitHub Issues API를 호출하는 Route Handler를 만들어 mock 데이터와 실데이터를 전환 가능하게 만들기.

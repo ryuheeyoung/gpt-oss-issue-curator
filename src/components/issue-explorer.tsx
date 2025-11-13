@@ -102,6 +102,7 @@ export function IssueExplorer() {
   const headingId = "issue-explorer-heading";
   const statsHeadingId = "issue-explorer-stats";
   const visibilitySummaryId = "issue-explorer-visibility";
+  const savedPanelHeadingId = "issue-explorer-saved-heading";
   const [query, setQuery] = useState("");
   const [language, setLanguage] = useState<string>("all");
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
@@ -109,6 +110,8 @@ export function IssueExplorer() {
   const [onlyGFI, setOnlyGFI] = useState(false);
   const [savedIssueIds, setSavedIssueIds] = useState<Set<string>>(new Set());
   const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [isSavedPanelOpen, setIsSavedPanelOpen] = useState(false);
+  const [activeSavedIssueId, setActiveSavedIssueId] = useState<string | null>(null);
   const hasHydrated = useRef(false);
 
   /**
@@ -152,6 +155,13 @@ export function IssueExplorer() {
     }
   }, []);
 
+  const savedIssues = useMemo(
+    () => curatedIssues.filter((issue) => savedIssueIds.has(issue.id)),
+    [savedIssueIds],
+  );
+  const activeSavedIssue =
+    savedIssues.find((issue) => issue.id === activeSavedIssueId) ?? null;
+
   /**
    * 필터 상태가 바뀌면 로컬 스토리지에 저장해 새로고침 후에도 컨텍스트 유지
    */
@@ -180,6 +190,35 @@ export function IssueExplorer() {
     showSavedOnly,
     savedIssueIds,
   ]);
+
+  useEffect(() => {
+    if (!isSavedPanelOpen || savedIssues.length === 0) {
+      return;
+    }
+    if (!activeSavedIssueId || !savedIssueIds.has(activeSavedIssueId)) {
+      setActiveSavedIssueId(savedIssues[0].id);
+    }
+  }, [activeSavedIssueId, isSavedPanelOpen, savedIssueIds, savedIssues]);
+
+  useEffect(() => {
+    if (savedIssues.length === 0 && isSavedPanelOpen) {
+      setIsSavedPanelOpen(false);
+      setActiveSavedIssueId(null);
+    }
+  }, [isSavedPanelOpen, savedIssues.length]);
+
+  useEffect(() => {
+    if (!isSavedPanelOpen || typeof window === "undefined") {
+      return;
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsSavedPanelOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSavedPanelOpen]);
 
   const filteredIssues = useMemo(
     () =>
@@ -257,6 +296,13 @@ export function IssueExplorer() {
     setLevel("all");
     setOnlyGFI(false);
     setShowSavedOnly(false);
+  };
+
+  /**
+   * 저장된 이슈 패널을 닫고 상태를 원복
+   */
+  const closeSavedPanel = () => {
+    setIsSavedPanelOpen(false);
   };
 
   return (
@@ -442,12 +488,21 @@ export function IssueExplorer() {
             </div>
 
             {savedIssueIds.size > 0 && (
-              <div
-                role="status"
-                aria-live="polite"
-                className="rounded-full border border-emerald-400/40 px-4 py-1 text-sm text-emerald-200"
-              >
-                {savedIssueIds.size} saved
+              <div className="flex flex-wrap items-center gap-2">
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="rounded-full border border-emerald-400/40 px-4 py-1 text-sm text-emerald-200"
+                >
+                  {savedIssueIds.size} saved
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSavedPanelOpen(true)}
+                  className="rounded-full border border-emerald-300/50 px-4 py-1 text-sm text-white transition hover:border-emerald-200 hover:bg-emerald-500/10"
+                >
+                  Saved issue panel
+                </button>
               </div>
             )}
           </div>
@@ -530,6 +585,120 @@ export function IssueExplorer() {
           </div>
         </div>
       </div>
+      {isSavedPanelOpen && savedIssues.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-end"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={savedPanelHeadingId}
+        >
+          <button
+            type="button"
+            aria-label="Close saved issue panel"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={closeSavedPanel}
+          />
+          <aside className="relative z-10 h-full w-full max-w-xl overflow-y-auto border-l border-white/10 bg-zinc-950/95 p-6 text-sm shadow-2xl shadow-black/60">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-emerald-400">
+                  Saved issues
+                </p>
+                <h2 id={savedPanelHeadingId} className="text-2xl font-semibold text-white">
+                  Quick detail view
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={closeSavedPanel}
+                className="rounded-full border border-white/10 px-3 py-1 text-xs text-white transition hover:border-red-300 hover:text-red-200"
+              >
+                Close
+              </button>
+            </div>
+            <div className="mt-4 flex flex-col gap-4 lg:flex-row">
+              <ul
+                className="flex-1 space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-white"
+                aria-label="Saved issue list"
+              >
+                {savedIssues.map((issue) => (
+                  <li key={issue.id}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveSavedIssueId(issue.id)}
+                      className={`w-full rounded-xl px-3 py-2 text-left transition ${
+                        issue.id === activeSavedIssueId
+                          ? "bg-emerald-500 text-emerald-950"
+                          : "bg-transparent text-white hover:bg-white/10"
+                      }`}
+                      aria-current={issue.id === activeSavedIssueId}
+                    >
+                      <span className="block text-[11px] uppercase text-emerald-200">
+                        {issue.repo}
+                      </span>
+                      <span className="block text-sm font-semibold">{issue.title}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {activeSavedIssue && (
+                <div className="flex-1 space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white">
+                  <div>
+                    <p className="text-xs uppercase text-zinc-300">
+                      Updated {formatRelativeTime(activeSavedIssue.updatedAt)}
+                    </p>
+                    <h3 className="text-lg font-semibold">{activeSavedIssue.title}</h3>
+                    <p className="mt-2 text-sm text-zinc-100">{activeSavedIssue.description}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-zinc-200">
+                      {activeSavedIssue.language}
+                    </span>
+                    <span className="rounded-full border border-white/10 px-3 py-1 capitalize text-zinc-200">
+                      {activeSavedIssue.level.replace("-", " ")}
+                    </span>
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-zinc-200">
+                      {activeSavedIssue.labels.join(", ")}
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-xs text-emerald-100">
+                    <p className="font-semibold uppercase tracking-wide text-emerald-300">
+                      Topics
+                    </p>
+                    <ul className="flex flex-wrap gap-2">
+                      {activeSavedIssue.topics.map((topic) => (
+                        <li
+                          key={topic}
+                          className="rounded-full border border-emerald-400/50 px-3 py-1"
+                        >
+                          {topic}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <a
+                      href={activeSavedIssue.link}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-emerald-200"
+                    >
+                      View on GitHub
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => toggleSavedIssue(activeSavedIssue.id)}
+                      className="rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-red-300 hover:text-red-200"
+                    >
+                      Remove from saved
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </aside>
+        </div>
+      )}
     </section>
   );
 }
