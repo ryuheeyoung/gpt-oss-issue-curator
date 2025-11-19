@@ -504,7 +504,7 @@ function FilterSidebar({
           <input
             type="checkbox"
             checked={onlyGFI}
-            onChange={() => setOnlyGFI((value) => !value)}
+            onChange={(event) => setOnlyGFI(event.target.checked)}
             className="size-4 rounded border border-white/30 bg-white/10 accent-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400/80"
           />
           Show only good first issue
