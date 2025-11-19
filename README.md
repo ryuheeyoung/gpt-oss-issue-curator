@@ -10,6 +10,7 @@ It pulls from a curated dataset of real GitHub issues (cached locally for now) a
 - Spotlight collections that group issues by contributor goals (docs, frontend polish, typed APIs)
 - Maintainer cheat-sheets with setup, etiquette, and docs links before you open a PR
 - Saved-issue side panel that lets you review your short list with full keyboard and screen-reader support.
+- Dimmed overlay uses a full-screen button so background taps can close the panel immediately and the intent stays accessible to keyboard users.
 
 The UI is purposely dense yet focused so you can find actionable work in minutes, not hours of scrolling.
 
@@ -22,6 +23,7 @@ The UI is purposely dense yet focused so you can find actionable work in minutes
 - 기여 목표별로 이슈를 묶어주는 스포트라이트 컬렉션
 - 세팅·에티켓·문서 링크를 한 번에 볼 수 있는 메인테이너 가이드
 - 저장한 이슈를 한눈에 훑을 수 있는 사이드 패널(키보드/스크린리더 지원)
+- 디밍 오버레이는 전체 버튼 요소라 배경을 탭하면 즉시 닫히고, 키보드 사용자도 동일한 의도로 접근할 수 있습니다.
 
 “정보는 많지만 집중력은 잃지 않는” UI 철학으로, 몇 분 만에 실행 가능한 작업을 찾을 수 있도록 설계했습니다.
 
