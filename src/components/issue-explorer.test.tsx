@@ -34,7 +34,9 @@ describe("IssueExplorer filtering behavior", () => {
     setup();
 
     expect(screen.getByText("Curated feed")).toBeInTheDocument();
-    expect(screen.getByText(`${curatedIssues.length} of ${curatedIssues.length} issues visible`)).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`^${Math.min(10, curatedIssues.length)} of ${curatedIssues.length} issues visible$`, "i")),
+    ).toBeInTheDocument();
   });
 
   it("filters issues when language and label are selected", async () => {
@@ -52,7 +54,7 @@ describe("IssueExplorer filtering behavior", () => {
     ).length;
 
     expect(
-      screen.getByText(new RegExp(`${expectedCount} of ${curatedIssues.length} issues visible`, "i")),
+      screen.getByText(new RegExp(`^${Math.min(expectedCount, 10)} of ${expectedCount} issues visible$`, "i")),
     ).toBeInTheDocument();
   });
 
@@ -63,7 +65,7 @@ describe("IssueExplorer filtering behavior", () => {
     const saveButtons = screen.getAllByRole("button", { name: /save/i });
     await user.click(saveButtons[0]);
 
-    const panelTrigger = await screen.findByRole("button", { name: /saved issue panel/i });
+    const panelTrigger = await screen.findByRole("button", { name: /saved issues/i });
     await user.click(panelTrigger);
 
     const dialog = await screen.findByRole("dialog", { name: /quick detail view/i });
